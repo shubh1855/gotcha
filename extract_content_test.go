@@ -9,29 +9,52 @@ func TestGetHeadingFromHTML(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "h1 exists",
-			html:     "<html><body><h1>Test Title</h1></body></html>",
-			expected: "Test Title",
+			name:     "single h1",
+			html:     "<h1>Hello</h1>",
+			expected: "Hello",
 		},
 		{
-			name:     "fallback to h2",
-			html:     "<html><body><h2>Heading Two</h2></body></html>",
-			expected: "Heading Two",
+			name:     "fallback h2",
+			html:     "<h2>Hello</h2>",
+			expected: "Hello",
 		},
 		{
 			name:     "prefer h1 over h2",
-			html:     "<html><body><h2>Second</h2><h1>First</h1></body></html>",
+			html:     "<h2>Second</h2><h1>First</h1>",
 			expected: "First",
+		}, {name: "multiple h1",
+			html:     "<h1>One</h1><h1>Two</h1>",
+			expected: "One",
 		},
 		{
-			name:     "no headings",
-			html:     "<html><body><p>Hello</p></body></html>",
-			expected: "",
+			name:     "nested formatting",
+			html:     "<h1>Hello <strong>World</strong></h1>",
+			expected: "Hello World",
 		},
 		{
 			name:     "trim whitespace",
-			html:     "<html><body><h1>   Boot.dev   </h1></body></html>",
-			expected: "Boot.dev",
+			html:     "<h1>   Hello   </h1>",
+			expected: "Hello",
+		},
+		{
+			name:     "empty heading",
+			html:     "<h1></h1>",
+			expected: "",
+		},
+		{
+			name:     "uppercase tag",
+			html:     "<H1>Hello</H1>",
+			expected: "Hello",
+		},
+		{
+			name:     "malformed html",
+			html:     "<h1>Hello",
+			expected: "Hello",
+		},
+		{
+			name:     "no headings",
+			html:     "<p>Hello</p>",
+			expected: "",
 		},
 	}
 
@@ -52,44 +75,83 @@ func TestGetFirstParagraphFromHTML(t *testing.T) {
 		expected string
 	}{
 		{
+			name:     "single paragraph",
+			html:     "<p>Hello</p>",
+			expected: "Hello",
+		},
+		{
+			name:     "multiple paragraphs",
+			html:     "<p>One</p><p>Two</p>",
+			expected: "One",
+		},
+		{
 			name: "prefer paragraph inside main",
-			html: `<html><body>
-				<p>Outside paragraph.</p>
+			html: `
+				<p>Outside</p>
 				<main>
-					<p>Main paragraph.</p>
+					<p>Inside</p>
 				</main>
-			</body></html>`,
-			expected: "Main paragraph.",
+			`,
+			expected: "Inside",
 		},
 		{
-			name: "fallback to first paragraph",
-			html: `<html><body>
-				<p>First paragraph.</p>
-				<p>Second paragraph.</p>
-			</body></html>`,
-			expected: "First paragraph.",
-		},
-		{
-			name: "first paragraph inside main",
-			html: `<html><body>
+			name: "nested paragraph inside article",
+			html: `
 				<main>
-					<p>First.</p>
-					<p>Second.</p>
+					<article>
+						<p>Nested</p>
+					</article>
 				</main>
-			</body></html>`,
-			expected: "First.",
+			`,
+			expected: "Nested",
 		},
 		{
-			name:     "no paragraph",
-			html:     "<html><body><h1>Title</h1></body></html>",
+			name:     "nested formatting",
+			html:     "<p>Hello <em>World</em></p>",
+			expected: "Hello World",
+		},
+		{
+			name:     "trim whitespace",
+			html:     "<p>   Hello World   </p>",
+			expected: "Hello World",
+		},
+		{
+			name:     "empty paragraph",
+			html:     "<p></p>",
 			expected: "",
 		},
 		{
-			name: "trim whitespace",
-			html: `<html><body>
-				<p>   Hello World   </p>
-			</body></html>`,
-			expected: "Hello World",
+			name:     "uppercase tag",
+			html:     "<P>Hello</P>",
+			expected: "Hello",
+		},
+		{
+			name:     "malformed html",
+			html:     "<p>Hello",
+			expected: "Hello",
+		},
+		{
+			name:     "no paragraph",
+			html:     "<div>Hello</div>",
+			expected: "",
+		},
+		{
+			name: "main exists but no paragraph",
+			html: `
+				<p>Outside</p>
+				<main>
+					<div>No paragraph</div>
+				</main>
+			`,
+			expected: "Outside",
+		},
+		{
+			name: "multiple main tags",
+			html: `
+				<main><p>First</p></main>
+				<main><p>Second</p></main>
+			`,
+			expected: "First",
 		},
 	}
 
