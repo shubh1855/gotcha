@@ -14,7 +14,17 @@ func main() {
 		os.Exit(1)
 
 	case 1:
+		baseURL := args[0]
+
 		fmt.Printf("starting crawl of site: %s\n", args[0])
+
+		html, err := getHTML(baseURL)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Println(html)
 
 	default:
 		fmt.Println("too many arguments provided")
