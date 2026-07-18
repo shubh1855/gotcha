@@ -25,11 +25,19 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		<-cfg.concurrencyControl
 	}()
 
+	cfg.mu.Lock()
+	reachedLimit := len(cfg.pages) >= cfg.maxPages
+	cfg.mu.Unlock()
+
+	if reachedLimit {
+		return
+	}
+
 	if !isSameDomain(cfg.baseURL.String(), rawCurrentURL) {
 		return
 	}
 
-	// Normalize the URL to map pages with same key
+	// normalize the URL to map pages with same key
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
 		fmt.Printf("error normalizing %q: %v\n", rawCurrentURL, err)
