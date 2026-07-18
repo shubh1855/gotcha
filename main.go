@@ -18,13 +18,16 @@ func main() {
 
 		fmt.Printf("starting crawl of site: %s\n", args[0])
 
-		html, err := getHTML(baseURL)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		pages := make(map[string]int)
 
-		fmt.Println(html)
+		crawlPage(baseURL, baseURL, pages)
+
+		fmt.Println()
+		fmt.Println("Pages crawled")
+
+		for page, count := range pages {
+			fmt.Printf("%3d %s\n", count, page)
+		}
 
 	default:
 		fmt.Println("too many arguments provided")
