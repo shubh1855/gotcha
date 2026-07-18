@@ -19,9 +19,13 @@ func isSameDomain(rawBaseURL, rawCurrentURL string) bool {
 	return baseURL.Host == currentURL.Host
 }
 
-func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
-	// crawling pages on the same domain
-	if !isSameDomain(rawBaseURL, rawCurrentURL) {
+func (cfg *config) crawlPage(rawCurrentURL string) {
+	defer cfg.wg.Done()
+	defer func() {
+		<-cfg.concurrencyControl
+	}()
+
+	if !isSameDomain(cfg.baseURL.String(), rawCurrentURL) {
 		return
 	}
 
@@ -32,39 +36,30 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 		return
 	}
 
-	// page visited
-	if count, ok := pages[normalizedURL]; ok {
-		pages[normalizedURL] = count + 1
+	if !cfg.addPageVisit(normalizedURL) {
 		return
 	}
-
-	// first visit of page
-	pages[normalizedURL] = 1
 
 	fmt.Printf("crawling: %s\n", rawCurrentURL)
 
-	// download the page
 	html, err := getHTML(rawCurrentURL)
 	if err != nil {
-		fmt.Printf("error fetching %q: %v\n", rawCurrentURL, err)
+		fmt.Println(err)
 		return
 	}
 
-	baseURL, err := url.Parse(rawCurrentURL)
-	if err != nil {
-		fmt.Printf("error parsing current URL %q: %v\n", rawCurrentURL, err)
-		return
-	}
+	pageData := extractPageData(html, rawCurrentURL)
 
-	// extract outgoing links
-	urls, err := getURLsFromHTML(html, baseURL)
-	if err != nil {
-		fmt.Printf("error extracting URLs from %q: %v\n", rawCurrentURL, err)
-		return
-	}
+	cfg.mu.Lock()
+	cfg.pages[normalizedURL] = pageData
+	cfg.mu.Unlock()
 
-	// depth-first crawl
-	for _, u := range urls {
-		crawlPage(rawBaseURL, u, pages)
+	for _, link := range pageData.OutgoingLinks {
+		cfg.wg.Add(1)
+
+		go func(link string) {
+			cfg.concurrencyControl <- struct{}{}
+			cfg.crawlPage(link)
+		}(link)
 	}
 }
