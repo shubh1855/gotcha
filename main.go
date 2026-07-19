@@ -74,6 +74,13 @@ func main() {
 
 	cfg.wg.Wait()
 
+	if err := writeJSONReport(cfg.pages, "report.json"); err != nil {
+		fmt.Printf("failed to write report: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("JSON report written to report.json")
+
 	fmt.Println("\nPages crawled:")
 
 	for _, page := range cfg.pages {
