@@ -20,7 +20,9 @@ func isSameDomain(rawBaseURL, rawCurrentURL string) bool {
 }
 
 func (cfg *config) crawlPage(rawCurrentURL string) {
+
 	defer cfg.wg.Done()
+
 	defer func() {
 		<-cfg.concurrencyControl
 	}()

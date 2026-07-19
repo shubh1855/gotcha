@@ -7,7 +7,8 @@ import (
 )
 
 func writeJSONReport(pages map[string]PageData, filename string) error {
-	keys := make([]string, len(pages))
+	keys := make([]string, 0, len(pages))
+
 	for key := range pages {
 		keys = append(keys, key)
 	}

@@ -74,6 +74,15 @@ func main() {
 
 	cfg.wg.Wait()
 
+	fmt.Println("pages:", len(cfg.pages))
+	fmt.Println("maxPages:", cfg.maxPages)
+
+	for key, page := range cfg.pages {
+		if page.URL == "" {
+			fmt.Println("empty page", key)
+		}
+	}
+
 	if err := writeJSONReport(cfg.pages, "report.json"); err != nil {
 		fmt.Printf("failed to write report: %v\n", err)
 		os.Exit(1)
