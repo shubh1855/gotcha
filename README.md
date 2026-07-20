@@ -1,25 +1,22 @@
 # Gotcha
 
-A concurrent web crawler written in Go that recursively crawls websites, extracts structured page data, and generates a JSON report.
+A fast, concurrent web crawler written in Go that recursively crawls websites, extracts structured page information, and exports the results as a JSON report.
 
 ## Features
 
-- Concurrent crawling with configurable worker limits
-- Recursive traversal of pages within the same domain
-- URL normalization to avoid duplicate crawls
+- Recursive crawling within a single domain
+- Configurable concurrency limit
 - Configurable maximum page limit
-- Extracts:
-  - Page URL
-  - Main heading
+- URL normalization to avoid duplicate crawls
+- Thread-safe crawling using goroutines, mutexes, and wait groups
+- Structured page extraction including:
+  - URL
+  - Heading
   - First paragraph
   - Outgoing links
   - Image URLs
-- Generates a structured `report.json`
-- Thread-safe crawling using goroutines, mutexes, and wait groups
 
-## Requirements
-
-- Go 1.26 or newer
+- Deterministic JSON report generation
 
 ## Installation
 
@@ -30,7 +27,7 @@ git clone https://github.com/<your-username>/Gotcha.git
 cd Gotcha
 ```
 
-Download dependencies:
+Install dependencies:
 
 ```bash
 go mod download
@@ -38,7 +35,7 @@ go mod download
 
 ## Usage
 
-Basic usage:
+Run the crawler:
 
 ```bash
 go run . <url>
@@ -50,48 +47,38 @@ Example:
 go run . https://learnwebscraping.dev/practice/ecommerce/
 ```
 
-Specify maximum concurrency:
+Specify concurrency:
 
 ```bash
 go run . <url> 10
 ```
 
-Specify both maximum concurrency and maximum pages:
+Specify both concurrency and maximum pages:
 
 ```bash
 go run . <url> 10 200
 ```
 
-You can also build it using the:
-
-```bash
-go build -o gotcha
-```
-
-Arguments:
-
 | Argument        | Description                        | Default  |
 | --------------- | ---------------------------------- | -------- |
-| URL             | Website to crawl                   | Required |
+| URL             | Starting URL                       | Required |
 | Max Concurrency | Number of concurrent crawl workers | 5        |
-| Max Pages       | Maximum pages to crawl             | 100      |
+| Max Pages       | Maximum number of pages to crawl   | 100      |
 
 ## Output
 
-After the crawl completes, a `report.json` file is generated in the project directory.
+After crawling completes, a `report.json` file is generated containing the extracted page information.
 
-Example:
+Each record contains:
 
 ```json
-[
-  {
-    "url": "https://example.com/",
-    "heading": "Example Domain",
-    "first_paragraph": "This domain is for use in illustrative examples.",
-    "outgoing_links": ["https://www.iana.org/domains/example"],
-    "image_urls": []
-  }
-]
+{
+  "url": "...",
+  "heading": "...",
+  "first_paragraph": "...",
+  "outgoing_links": [],
+  "image_urls": []
+}
 ```
 
 ## Project Structure
@@ -109,18 +96,32 @@ Example:
 └── parser.go
 ```
 
-## How it Works
+## How It Works
 
-1. Starts from the provided URL.
-2. Crawls pages concurrently while respecting the configured concurrency limit.
-3. Ignores pages outside the starting domain.
-4. Normalizes URLs to avoid revisiting the same page.
-5. Extracts structured page information.
-6. Stores results in memory.
-7. Exports the crawl as a sorted JSON report.
+1. Start from the provided URL.
+2. Crawl pages recursively while remaining within the same domain.
+3. Normalize URLs to prevent duplicate visits.
+4. Fetch and parse HTML pages.
+5. Extract structured page information.
+6. Store page data in memory.
+7. Export a sorted JSON report.
 
-## Notes
+## Roadmap
 
-- Only pages within the starting domain are crawled.
-- Duplicate URLs are skipped.
-- Crawling stops when the configured page limit is reached.
+This project is actively being improved. Planned enhancements include:
+
+- More robust HTTP error handling and retry logic
+- Better handling of redirects, rate limiting, and timeouts
+- Tracking internal vs. external links
+- Crawl statistics and summary reporting
+- Smarter duplicate detection
+- Configurable User-Agent and request headers
+- robots.txt support
+- Sitemap generation
+- Structured logging
+- Benchmarking and performance improvements
+- Unit and integration test expansion
+
+## License
+
+GPLV3
