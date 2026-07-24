@@ -31,20 +31,24 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	cfg.mu.Unlock()
 
 	if reachedLimit {
+		cfg.incrementSkippedPages()
 		return
 	}
 
 	if !isSameDomain(cfg.baseURL.String(), rawCurrentURL) {
+		cfg.incrementSkippedPages()
 		return
 	}
 
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
 		fmt.Printf("warning: failed to normalize %q: %v\n", rawCurrentURL, err)
+		cfg.incrementSkippedPages()
 		return
 	}
 
 	if !cfg.addPageVisit(normalizedURL) {
+		cfg.incrementSkippedPages()
 		return
 	}
 
@@ -53,6 +57,7 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	html, err := getHTML(rawCurrentURL)
 	if err != nil {
 		fmt.Printf("warning: %v\n", err)
+		cfg.incrementFailedFetches()
 		return
 	}
 
@@ -61,6 +66,8 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	cfg.mu.Lock()
 	cfg.pages[normalizedURL] = pageData
 	cfg.mu.Unlock()
+
+	cfg.incrementPagesCrawled()
 
 	for _, link := range pageData.OutgoingLinks {
 		cfg.wg.Add(1)

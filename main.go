@@ -74,14 +74,10 @@ func main() {
 
 	cfg.wg.Wait()
 
-	fmt.Println("pages:", len(cfg.pages))
-	fmt.Println("maxPages:", cfg.maxPages)
-
-	for key, page := range cfg.pages {
-		if page.URL == "" {
-			fmt.Println("empty page", key)
-		}
-	}
+	fmt.Println("\nCrawl complete")
+	fmt.Printf("Pages crawled : %d\n", cfg.stats.PagesCrawled)
+	fmt.Printf("Pages skipped : %d\n", cfg.stats.SkippedPages)
+	fmt.Printf("Failed fetches: %d\n", cfg.stats.FailedFetches)
 
 	if err := writeJSONReport(cfg.pages, "report.json"); err != nil {
 		fmt.Printf("failed to write report: %v\n", err)
@@ -89,10 +85,4 @@ func main() {
 	}
 
 	fmt.Println("JSON report written to report.json")
-
-	fmt.Println("\nPages crawled:")
-
-	for _, page := range cfg.pages {
-		fmt.Printf("%+v\n", page)
-	}
 }
