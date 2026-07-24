@@ -20,7 +20,6 @@ func isSameDomain(rawBaseURL, rawCurrentURL string) bool {
 }
 
 func (cfg *config) crawlPage(rawCurrentURL string) {
-
 	defer cfg.wg.Done()
 
 	defer func() {
@@ -39,10 +38,9 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		return
 	}
 
-	// normalize the URL to map pages with same key
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
-		fmt.Printf("error normalizing %q: %v\n", rawCurrentURL, err)
+		fmt.Printf("warning: failed to normalize %q: %v\n", rawCurrentURL, err)
 		return
 	}
 
@@ -54,7 +52,7 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	html, err := getHTML(rawCurrentURL)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("warning: %v\n", err)
 		return
 	}
 
