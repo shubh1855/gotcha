@@ -27,12 +27,19 @@ func getHTML(rawURL string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("GET %q: unexpected status %s", rawURL, resp.Status)
+		return "", &HTTPStatusError{
+			URL:    rawURL,
+			Code:   resp.StatusCode,
+			Status: resp.Status,
+		}
 	}
 
 	contentType := resp.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/html") {
-		return "", fmt.Errorf("GET %q: unsupported content type text/html, got %q", rawURL, contentType)
+		return "", &ContentTypeError{
+			URL:         rawURL,
+			ContentType: contentType,
+		}
 	}
 
 	body, err := io.ReadAll(resp.Body)
