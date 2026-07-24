@@ -110,17 +110,17 @@ Each record contains:
 
 This project is actively being improved. Planned enhancements include:
 
-- More robust HTTP error handling and retry logic
-- Better handling of redirects, rate limiting, and timeouts
-- Tracking internal vs. external links
-- Crawl statistics and summary reporting
-- Smarter duplicate detection
-- Configurable User-Agent and request headers
-- robots.txt support
-- Sitemap generation
-- Structured logging
-- Benchmarking and performance improvements
-- Unit and integration test expansion
+- [ ] More robust HTTP error handling and retry logic
+- [ ] Better handling of redirects, rate limiting, and timeouts
+- [ ] Tracking internal vs. external links
+- [ ] Crawl statistics and summary reporting
+- [ ] Smarter duplicate detection
+- [ ] Configurable User-Agent and request headers
+- [ ] robots.txt support
+- [ ] Sitemap generation
+- [ ] Structured logging
+- [ ] Benchmarking and performance improvements
+- [ ] Unit and integration test expansion
 
 ## License
 

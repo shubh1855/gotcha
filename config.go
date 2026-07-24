@@ -12,6 +12,7 @@ type config struct {
 	concurrencyControl chan struct{}
 	wg                 *sync.WaitGroup
 	maxPages           int
+	stats              CrawlerStats
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {

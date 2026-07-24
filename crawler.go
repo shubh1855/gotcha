@@ -20,7 +20,6 @@ func isSameDomain(rawBaseURL, rawCurrentURL string) bool {
 }
 
 func (cfg *config) crawlPage(rawCurrentURL string) {
-
 	defer cfg.wg.Done()
 
 	defer func() {
@@ -32,21 +31,24 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	cfg.mu.Unlock()
 
 	if reachedLimit {
+		cfg.incrementSkippedPages()
 		return
 	}
 
 	if !isSameDomain(cfg.baseURL.String(), rawCurrentURL) {
+		cfg.incrementSkippedPages()
 		return
 	}
 
-	// normalize the URL to map pages with same key
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
-		fmt.Printf("error normalizing %q: %v\n", rawCurrentURL, err)
+		fmt.Printf("warning: failed to normalize %q: %v\n", rawCurrentURL, err)
+		cfg.incrementSkippedPages()
 		return
 	}
 
 	if !cfg.addPageVisit(normalizedURL) {
+		cfg.incrementSkippedPages()
 		return
 	}
 
@@ -54,7 +56,8 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	html, err := getHTML(rawCurrentURL)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("warning: %v\n", err)
+		cfg.incrementFailedFetches()
 		return
 	}
 
@@ -63,6 +66,8 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	cfg.mu.Lock()
 	cfg.pages[normalizedURL] = pageData
 	cfg.mu.Unlock()
+
+	cfg.incrementPagesCrawled()
 
 	for _, link := range pageData.OutgoingLinks {
 		cfg.wg.Add(1)
