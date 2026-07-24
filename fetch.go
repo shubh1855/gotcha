@@ -5,36 +5,39 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
-func getHTML(rawURL string) (string, error) {
-	client := &http.Client{}
+var httpClient = &http.Client{
+	Timeout: 15 * time.Second,
+}
 
+func getHTML(rawURL string) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("create request for %q: %w", rawURL, err)
 	}
 
-	req.Header.Set("User-Agent", "Bootcrawler/1.0")
+	req.Header.Set("User-Agent", "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)")
 
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("GET %q: %w", rawURL, err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= http.StatusBadRequest {
-		return "", fmt.Errorf("received HTTP status %d", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GET %q: unexpected status %s", rawURL, resp.Status)
 	}
 
 	contentType := resp.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/html") {
-		return "", fmt.Errorf("expected Content-Type text/html, got %q", contentType)
+		return "", fmt.Errorf("GET %q: unsupported content type text/html, got %q", rawURL, contentType)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("read response body for %q: %w", rawURL, err)
 	}
 
 	return string(body), nil
