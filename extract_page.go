@@ -33,6 +33,7 @@ func extractPageData(html, pageURL string) PageData {
 
 		// Populated with all discovered links; classified by the crawler
 		InternalLinks: discoveredLinks,
+		ExternalLinks: []string{},
 
 		ImageURLs: imageURLs,
 	}
