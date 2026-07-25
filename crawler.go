@@ -68,6 +68,9 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		pageData.InternalLinks,
 	)
 
+	cfg.incrementInternalLinks(len(pageData.InternalLinks))
+	cfg.incrementExternalLinks(len(pageData.ExternalLinks))
+
 	cfg.mu.Lock()
 	cfg.pages[normalizedURL] = pageData
 	cfg.mu.Unlock()

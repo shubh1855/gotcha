@@ -78,6 +78,8 @@ func main() {
 	fmt.Printf("Pages crawled : %d\n", cfg.stats.PagesCrawled)
 	fmt.Printf("Pages skipped : %d\n", cfg.stats.SkippedPages)
 	fmt.Printf("Failed fetches: %d\n", cfg.stats.FailedFetches)
+	fmt.Printf("Internal links: %d\n", cfg.stats.InternalLinks)
+	fmt.Printf("External links: %d\n", cfg.stats.ExternalLinks)
 
 	if err := writeJSONReport(cfg.pages, "report.json"); err != nil {
 		fmt.Printf("failed to write report: %v\n", err)
