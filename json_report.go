@@ -6,7 +6,16 @@ import (
 	"sort"
 )
 
-func writeJSONReport(pages map[string]PageData, filename string) error {
+type CrawlReport struct {
+	Summary CrawlerStats `json:"summary"`
+	Pages   []PageData   `json:"pages"`
+}
+
+func writeJSONReport(
+	pages map[string]PageData,
+	stats CrawlerStats,
+	filename string,
+) error {
 	keys := make([]string, 0, len(pages))
 
 	for key := range pages {
@@ -20,7 +29,12 @@ func writeJSONReport(pages map[string]PageData, filename string) error {
 		report = append(report, pages[key])
 	}
 
-	data, err := json.MarshalIndent(report, "", " ")
+	crawlReport := CrawlReport{
+		Summary: stats,
+		Pages:   report,
+	}
+
+	data, err := json.MarshalIndent(crawlReport, "", "")
 	if err != nil {
 		return err
 	}

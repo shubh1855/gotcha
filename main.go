@@ -81,7 +81,11 @@ func main() {
 	fmt.Printf("Internal links: %d\n", cfg.stats.InternalLinks)
 	fmt.Printf("External links: %d\n", cfg.stats.ExternalLinks)
 
-	if err := writeJSONReport(cfg.pages, "report.json"); err != nil {
+	if err := writeJSONReport(
+		cfg.pages,
+		cfg.stats,
+		"report.json",
+	); err != nil {
 		fmt.Printf("failed to write report: %v\n", err)
 		os.Exit(1)
 	}
