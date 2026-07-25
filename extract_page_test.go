@@ -25,9 +25,10 @@ func TestExtractPageData(t *testing.T) {
 				URL:            "https://crawler-test.com",
 				Heading:        "Test Title",
 				FirstParagraph: "This is the first paragraph.",
-				OutgoingLinks: []string{
+				InternalLinks: []string{
 					"https://crawler-test.com/link1",
 				},
+				ExternalLinks: []string{},
 				ImageURLs: []string{
 					"https://crawler-test.com/image1.jpg",
 				},
@@ -52,10 +53,11 @@ func TestExtractPageData(t *testing.T) {
 				URL:            "https://crawler-test.com",
 				Heading:        "Heading",
 				FirstParagraph: "Main paragraph.",
-				OutgoingLinks: []string{
+				InternalLinks: []string{
 					"https://crawler-test.com/about",
 					"https://google.com",
 				},
+				ExternalLinks: []string{},
 				ImageURLs: []string{
 					"https://crawler-test.com/logo.png",
 					"https://cdn.com/banner.png",
@@ -70,7 +72,8 @@ func TestExtractPageData(t *testing.T) {
 				URL:            "https://crawler-test.com",
 				Heading:        "",
 				FirstParagraph: "",
-				OutgoingLinks:  []string{},
+				InternalLinks:  []string{},
+				ExternalLinks:  []string{},
 				ImageURLs:      []string{},
 			},
 		},
@@ -81,7 +84,21 @@ func TestExtractPageData(t *testing.T) {
 			actual := extractPageData(tt.html, tt.url)
 
 			if !reflect.DeepEqual(actual, tt.expected) {
-				t.Errorf("\nexpected:\n%+v\n\actual:\n%+v", tt.expected, actual)
+				// t.Errorf("\nexpected:\n%+v\n\nactual:\n%+v",
+				// 	tt.expected,
+				// 	actual,
+				//)
+				t.Errorf(
+					"expected InternalLinks nil? %v len=%d\nactual InternalLinks nil? %v len=%d\n"+
+						"expected ExternalLinks nil? %v len=%d\nactual ExternalLinks nil? %v len=%d\n"+
+						"expected ImageURLs nil? %v len=%d\nactual ImageURLs nil? %v len=%d",
+					tt.expected.InternalLinks == nil, len(tt.expected.InternalLinks),
+					actual.InternalLinks == nil, len(actual.InternalLinks),
+					tt.expected.ExternalLinks == nil, len(tt.expected.ExternalLinks),
+					actual.ExternalLinks == nil, len(actual.ExternalLinks),
+					tt.expected.ImageURLs == nil, len(tt.expected.ImageURLs),
+					actual.ImageURLs == nil, len(actual.ImageURLs),
+				)
 			}
 		})
 	}

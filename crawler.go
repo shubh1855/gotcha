@@ -63,13 +63,21 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	pageData := extractPageData(html, rawCurrentURL)
 
+	pageData.InternalLinks, pageData.ExternalLinks = classifyLinks(
+		cfg.baseURL,
+		pageData.InternalLinks,
+	)
+
+	cfg.incrementInternalLinks(len(pageData.InternalLinks))
+	cfg.incrementExternalLinks(len(pageData.ExternalLinks))
+
 	cfg.mu.Lock()
 	cfg.pages[normalizedURL] = pageData
 	cfg.mu.Unlock()
 
 	cfg.incrementPagesCrawled()
 
-	for _, link := range pageData.OutgoingLinks {
+	for _, link := range pageData.InternalLinks {
 		cfg.wg.Add(1)
 
 		go func(link string) {
