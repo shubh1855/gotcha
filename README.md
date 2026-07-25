@@ -110,10 +110,10 @@ Each record contains:
 
 This project is actively being improved. Planned enhancements include:
 
-- [ ] More robust HTTP error handling and retry logic
+- [x] More robust HTTP error handling and retry logic
 - [ ] Better handling of redirects, rate limiting, and timeouts
-- [ ] Tracking internal vs. external links
-- [ ] Crawl statistics and summary reporting
+- [x] Tracking internal vs. external links
+- [x] Crawl statistics and summary reporting
 - [ ] Smarter duplicate detection
 - [ ] Configurable User-Agent and request headers
 - [ ] robots.txt support
@@ -124,4 +124,4 @@ This project is actively being improved. Planned enhancements include:
 
 ## License
 
-GPLV3
+GPLv3
