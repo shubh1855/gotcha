@@ -40,6 +40,12 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		return
 	}
 
+	if !cfg.isAllowed(rawCurrentURL) {
+		cfg.incrementRobotsSkipped()
+		fmt.Printf("Skipping %s (disallowed by robots.txt)\n", rawCurrentURL)
+		return
+	}
+
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
 		fmt.Printf("warning: failed to normalize %q: %v\n", rawCurrentURL, err)

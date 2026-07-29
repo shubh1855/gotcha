@@ -76,3 +76,67 @@ Disallow: /secret
 		})
 	}
 }
+
+func TestIsAllowed(t *testing.T) {
+	tests := []struct {
+		name    string
+		rules   []string
+		url     string
+		allowed bool
+	}{
+		{
+			name:    "allowed page",
+			rules:   []string{"/admin", "/private"},
+			url:     "https://example.com/about",
+			allowed: true,
+		},
+		{
+			name:    "exact match",
+			rules:   []string{"/admin", "/private"},
+			url:     "https://example.com/admin",
+			allowed: false,
+		},
+		{
+			name:    "child path",
+			rules:   []string{"/admin", "/private"},
+			url:     "https://example.com/admin/users",
+			allowed: false,
+		},
+		{
+			name:    "private child",
+			rules:   []string{"/admin", "/private"},
+			url:     "https://example.com/private/data",
+			allowed: false,
+		},
+		{
+			name:    "administrator should be allowed",
+			rules:   []string{"/admin", "/private"},
+			url:     "https://example.com/administrator",
+			allowed: true,
+		},
+		{
+			name:    "root disallow blocks everything",
+			rules:   []string{"/"},
+			url:     "https://example.com/anything",
+			allowed: false,
+		},
+		{
+			name:    "root itself blocked",
+			rules:   []string{"/"},
+			url:     "https://example.com/",
+			allowed: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &config{
+				robotsRules: tt.rules,
+			}
+
+			if got := cfg.isAllowed(tt.url); got != tt.allowed {
+				t.Errorf("isAllowed(%q) = %v, want %v", tt.url, got, tt.allowed)
+			}
+		})
+	}
+}
