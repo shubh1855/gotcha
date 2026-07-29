@@ -13,6 +13,7 @@ type config struct {
 	wg                 *sync.WaitGroup
 	maxPages           int
 	stats              CrawlerStats
+	userAgent          string
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {

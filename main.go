@@ -11,13 +11,14 @@ import (
 const (
 	defaultMaxConcurrency = 5
 	defaultMaxPages       = 100
+	defaultUserAgent      = "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)"
 )
 
 func main() {
 	args := os.Args[1:]
 
-	if len(args) < 1 || len(args) > 3 {
-		fmt.Println("Usage: crawler <url> [maxConcurrency] [maxPages]")
+	if len(args) < 1 || len(args) > 4 {
+		fmt.Println("Usage: crawler <url> [maxConcurrency] [maxPages] [userAgent]")
 		os.Exit(1)
 	}
 
@@ -43,6 +44,11 @@ func main() {
 		}
 	}
 
+	userAgent := defaultUserAgent
+	if len(os.Args) >= 4 {
+		userAgent = args[3]
+	}
+
 	baseURL, err := url.Parse(rawURL)
 	if err != nil {
 		fmt.Printf("invalid URL: %v\n", err)
@@ -51,10 +57,11 @@ func main() {
 
 	fmt.Printf(
 		"Starting crawl of %s (max concurrency: %d, max pages: %d)\n",
-		rawURL,
+		baseURL.String(),
 		maxConcurrency,
 		maxPages,
 	)
+	fmt.Printf("User-Agent: %s\n", userAgent)
 
 	cfg := &config{
 		pages:              make(map[string]PageData),
@@ -63,6 +70,7 @@ func main() {
 		concurrencyControl: make(chan struct{}, maxConcurrency),
 		wg:                 &sync.WaitGroup{},
 		maxPages:           maxPages,
+		userAgent:          userAgent,
 	}
 
 	cfg.wg.Add(1)

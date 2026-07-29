@@ -115,7 +115,7 @@ This project is actively being improved. Planned enhancements include:
 - [x] Tracking internal vs. external links
 - [x] Crawl statistics and summary reporting
 - [ ] Smarter duplicate detection
-- [ ] Configurable User-Agent and request headers
+- [x] Configurable User-Agent and request headers
 - [ ] robots.txt support
 - [ ] Sitemap generation
 - [ ] Structured logging
