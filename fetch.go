@@ -42,13 +42,13 @@ func shouldRetry(err error) bool {
 	return false
 }
 
-func fetchHTML(rawURL string) (string, error) {
+func (cfg *config) fetchHTML(rawURL string) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("create request for %q: %w", rawURL, err)
 	}
 
-	req.Header.Set("User-Agent", "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)")
+	req.Header.Set("User-Agent", cfg.userAgent)
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -80,11 +80,11 @@ func fetchHTML(rawURL string) (string, error) {
 	return string(body), nil
 }
 
-func getHTML(rawURL string) (string, error) {
+func (cfg *config) getHTML(rawURL string) (string, error) {
 	var err error
 
 	for attempt := 0; attempt <= maxRetries; attempt++ {
-		html, err := fetchHTML(rawURL)
+		html, err := cfg.fetchHTML(rawURL)
 		if err == nil {
 			return html, nil
 		}

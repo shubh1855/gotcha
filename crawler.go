@@ -54,7 +54,7 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	fmt.Printf("crawling: %s\n", rawCurrentURL)
 
-	html, err := getHTML(rawCurrentURL)
+	html, err := cfg.getHTML(rawCurrentURL)
 	if err != nil {
 		fmt.Printf("warning: %v\n", err)
 		cfg.incrementFailedFetches()

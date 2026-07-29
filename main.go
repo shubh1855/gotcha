@@ -11,6 +11,7 @@ import (
 const (
 	defaultMaxConcurrency = 5
 	defaultMaxPages       = 100
+	defaultUserAgent      = "Gotcha/1.0"
 )
 
 func main() {
@@ -63,6 +64,7 @@ func main() {
 		concurrencyControl: make(chan struct{}, maxConcurrency),
 		wg:                 &sync.WaitGroup{},
 		maxPages:           maxPages,
+		userAgent:          defaultUserAgent,
 	}
 
 	cfg.wg.Add(1)
