@@ -45,7 +45,7 @@ func main() {
 	}
 
 	userAgent := defaultUserAgent
-	if len(os.Args) >= 4 {
+	if len(args) >= 4 {
 		userAgent = args[3]
 	}
 
@@ -73,6 +73,10 @@ func main() {
 		userAgent:          userAgent,
 	}
 
+	if err := cfg.loadRobotsTxt(); err != nil {
+		fmt.Printf("Warning: failed to load robots.txt: %v\n", err)
+	}
+
 	cfg.wg.Add(1)
 
 	go func() {
@@ -85,6 +89,7 @@ func main() {
 	fmt.Println("\nCrawl complete")
 	fmt.Printf("Pages crawled : %d\n", cfg.stats.PagesCrawled)
 	fmt.Printf("Pages skipped : %d\n", cfg.stats.SkippedPages)
+	fmt.Printf("Robots skipped: %d\n", cfg.stats.RobotsSkipped)
 	fmt.Printf("Failed fetches: %d\n", cfg.stats.FailedFetches)
 	fmt.Printf("Internal links: %d\n", cfg.stats.InternalLinks)
 	fmt.Printf("External links: %d\n", cfg.stats.ExternalLinks)

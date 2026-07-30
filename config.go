@@ -14,6 +14,7 @@ type config struct {
 	maxPages           int
 	stats              CrawlerStats
 	userAgent          string
+	robotsRules        []string
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {

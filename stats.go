@@ -7,6 +7,8 @@ type CrawlerStats struct {
 
 	InternalLinks int
 	ExternalLinks int
+
+	RobotsSkipped int
 }
 
 func (cfg *config) incrementPagesCrawled() {
@@ -42,4 +44,11 @@ func (cfg *config) incrementExternalLinks(n int) {
 	defer cfg.mu.Unlock()
 
 	cfg.stats.ExternalLinks += n
+}
+
+func (cfg *config) incrementRobotsSkipped() {
+	cfg.mu.Lock()
+	defer cfg.mu.Unlock()
+
+	cfg.stats.RobotsSkipped++
 }
