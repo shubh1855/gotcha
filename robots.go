@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -67,7 +67,11 @@ func (cfg *config) loadRobotsTxt() error {
 
 	cfg.robotsRules = parseRobotsTxt(content)
 
-	fmt.Printf("Loaded %d robots.txt rule(s)\n", len(cfg.robotsRules))
+	logger.Info(
+		"loaded robots.txt",
+		slog.Int("rules", len(cfg.robotsRules)),
+	)
+
 	return nil
 }
 
@@ -80,17 +84,6 @@ func (cfg *config) isAllowed(rawURL string) bool {
 	path := parsedURL.Path
 
 	for _, rule := range cfg.robotsRules {
-		// Disallow: /
-		if rule == "/" {
-			return false
-		}
-
-		// Exact match
-		if path == rule {
-			return false
-		}
-
-		// Child paths
 		if strings.HasPrefix(path, rule+"/") {
 			return false
 		}
