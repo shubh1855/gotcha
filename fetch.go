@@ -50,11 +50,23 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 
 	req.Header.Set("User-Agent", cfg.userAgent)
 
+	logger.Debug(
+		"sending HTTP request",
+		"url", rawURL,
+		"user_agent", cfg.userAgent,
+	)
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("GET %q: %w", rawURL, err)
 	}
 	defer resp.Body.Close()
+
+	logger.Debug(
+		"received HTTP response",
+		"url", rawURL,
+		"status", resp.StatusCode,
+	)
 
 	if resp.StatusCode != http.StatusOK {
 		return "", &HTTPStatusError{
@@ -77,6 +89,12 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 		return "", fmt.Errorf("read response body for %q: %w", rawURL, err)
 	}
 
+	logger.Debug(
+		"downloaded page",
+		"url", rawURL,
+		"bytes", len(body),
+	)
+
 	return string(body), nil
 }
 
@@ -97,12 +115,31 @@ func (cfg *config) getHTML(rawURL string) (string, error) {
 			break
 		}
 
-		time.Sleep(backoff(attempt))
+		delay := backoff(attempt)
+
+		logger.Warn(
+			"retrying request",
+			"url", rawURL,
+			"attempt", attempt+1,
+			"max_attempts", maxRetries,
+			"delay", delay,
+			"error", err,
+		)
+
+		time.Sleep(delay)
 	}
+
+	logger.Error(
+		"request failed",
+		"url", rawURL,
+		"retries", maxRetries,
+		"error", err,
+	)
 
 	return "", fmt.Errorf(
 		"GET %q: failed after %d retries: %w",
 		rawURL,
 		maxRetries,
-		err)
+		err,
+	)
 }
