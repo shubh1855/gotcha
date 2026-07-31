@@ -45,12 +45,24 @@ func main() {
 		"Enable debug logging",
 	)
 
+	version := flag.BoolP(
+		"version",
+		"V",
+		false,
+		"Print version information",
+	)
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 
 	flag.Parse()
+
+	if *version {
+		fmt.Println(VersionString())
+		return
+	}
 
 	if flag.NArg() != 1 {
 		flag.Usage()
