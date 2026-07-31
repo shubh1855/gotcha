@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"strconv"
@@ -74,7 +75,10 @@ func main() {
 	}
 
 	if err := cfg.loadRobotsTxt(); err != nil {
-		fmt.Printf("Warning: failed to load robots.txt: %v\n", err)
+		logger.Warn(
+			"failed to load robots.txt",
+			slog.Any("error", err),
+		)
 	}
 
 	cfg.wg.Add(1)
@@ -86,13 +90,15 @@ func main() {
 
 	cfg.wg.Wait()
 
-	fmt.Println("\nCrawl complete")
-	fmt.Printf("Pages crawled : %d\n", cfg.stats.PagesCrawled)
-	fmt.Printf("Pages skipped : %d\n", cfg.stats.SkippedPages)
-	fmt.Printf("Robots skipped: %d\n", cfg.stats.RobotsSkipped)
-	fmt.Printf("Failed fetches: %d\n", cfg.stats.FailedFetches)
-	fmt.Printf("Internal links: %d\n", cfg.stats.InternalLinks)
-	fmt.Printf("External links: %d\n", cfg.stats.ExternalLinks)
+	logger.Info(
+		"crawl complete",
+		slog.Int("pages_crawled", cfg.stats.PagesCrawled),
+		slog.Int("pages_skipped", cfg.stats.SkippedPages),
+		slog.Int("robots_skipped", cfg.stats.RobotsSkipped),
+		slog.Int("failed_fetches", cfg.stats.FailedFetches),
+		slog.Int("internal_links", cfg.stats.InternalLinks),
+		slog.Int("external_links", cfg.stats.ExternalLinks),
+	)
 
 	if err := writeJSONReport(
 		cfg.pages,

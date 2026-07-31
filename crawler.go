@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/url"
 )
 
@@ -42,13 +43,20 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	if !cfg.isAllowed(rawCurrentURL) {
 		cfg.incrementRobotsSkipped()
-		fmt.Printf("Skipping %s (disallowed by robots.txt)\n", rawCurrentURL)
+		logger.Warn(
+			"skipping page",
+			slog.String("url", rawCurrentURL),
+			slog.String("reason", "robots.txt"))
 		return
 	}
 
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
-		fmt.Printf("warning: failed to normalize %q: %v\n", rawCurrentURL, err)
+		logger.Warn(
+			"failed to normalize URL",
+			slog.String("url", rawCurrentURL),
+			slog.Any("error", err),
+		)
 		cfg.incrementSkippedPages()
 		return
 	}
@@ -58,7 +66,10 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		return
 	}
 
-	fmt.Printf("crawling: %s\n", rawCurrentURL)
+	logger.Info(
+		"crawling page",
+		slog.String("url", rawCurrentURL),
+	)
 
 	html, err := cfg.getHTML(rawCurrentURL)
 	if err != nil {
