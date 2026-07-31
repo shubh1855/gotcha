@@ -5,8 +5,9 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
-	"strconv"
 	"sync"
+
+	flag "github.com/spf13/pflag"
 )
 
 const (
@@ -16,62 +17,75 @@ const (
 )
 
 func main() {
-	args := os.Args[1:]
+	concurrency := flag.IntP(
+		"concurrency",
+		"c",
+		defaultMaxConcurrency,
+		"Maximum number of concurrent requests",
+	)
 
-	if len(args) < 1 || len(args) > 4 {
-		fmt.Println("Usage: crawler <url> [maxConcurrency] [maxPages] [userAgent]")
+	pages := flag.IntP(
+		"pages",
+		"p",
+		defaultMaxPages,
+		"Maximum number of pages to crawl",
+	)
+
+	userAgent := flag.StringP(
+		"user-agent",
+		"u",
+		defaultUserAgent,
+		"HTTP User-Agent",
+	)
+
+	verbose := flag.BoolP(
+		"verbose",
+		"v",
+		false,
+		"Enable debug logging",
+	)
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+
+	flag.Parse()
+
+	if flag.NArg() != 1 {
+		flag.Usage()
 		os.Exit(1)
 	}
 
-	rawURL := args[0]
-	maxConcurrency := defaultMaxConcurrency
-	maxPages := defaultMaxPages
+	initLogger(*verbose)
 
-	if len(args) >= 2 {
-		var err error
-		maxConcurrency, err = strconv.Atoi(args[1])
-		if err != nil || maxConcurrency <= 0 {
-			fmt.Println("maxConcurrency must be a positive integer")
-			os.Exit(1)
-		}
-	}
-
-	if len(args) >= 3 {
-		var err error
-		maxPages, err = strconv.Atoi(args[2])
-		if err != nil || maxPages <= 0 {
-			fmt.Println("maxPages must be a positive integer")
-			os.Exit(1)
-		}
-	}
-
-	userAgent := defaultUserAgent
-	if len(args) >= 4 {
-		userAgent = args[3]
-	}
+	rawURL := flag.Arg(0)
 
 	baseURL, err := url.Parse(rawURL)
 	if err != nil {
-		fmt.Printf("invalid URL: %v\n", err)
+		logger.Error(
+			"invalid URL",
+			slog.Any("error", err),
+		)
 		os.Exit(1)
 	}
 
-	fmt.Printf(
-		"Starting crawl of %s (max concurrency: %d, max pages: %d)\n",
-		baseURL.String(),
-		maxConcurrency,
-		maxPages,
+	logger.Info(
+		"starting crawl",
+		slog.String("url", baseURL.String()),
+		slog.Int("concurrency", *concurrency),
+		slog.Int("max_pages", *pages),
+		slog.String("user_agent", *userAgent),
 	)
-	fmt.Printf("User-Agent: %s\n", userAgent)
 
 	cfg := &config{
 		pages:              make(map[string]PageData),
 		baseURL:            baseURL,
 		mu:                 &sync.Mutex{},
-		concurrencyControl: make(chan struct{}, maxConcurrency),
+		concurrencyControl: make(chan struct{}, *concurrency),
 		wg:                 &sync.WaitGroup{},
-		maxPages:           maxPages,
-		userAgent:          userAgent,
+		maxPages:           *pages,
+		userAgent:          *userAgent,
 	}
 
 	if err := cfg.loadRobotsTxt(); err != nil {
@@ -100,14 +114,16 @@ func main() {
 		slog.Int("external_links", cfg.stats.ExternalLinks),
 	)
 
-	if err := writeJSONReport(
-		cfg.pages,
-		cfg.stats,
-		"report.json",
-	); err != nil {
-		fmt.Printf("failed to write report: %v\n", err)
+	if err := writeJSONReport(cfg.pages, cfg.stats, "report.json"); err != nil {
+		logger.Error(
+			"failed to write JSON report",
+			slog.Any("error", err),
+		)
 		os.Exit(1)
 	}
 
-	fmt.Println("JSON report written to report.json")
+	logger.Info(
+		"JSON report written",
+		slog.String("path", "report.json"),
+	)
 }
