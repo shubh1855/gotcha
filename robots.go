@@ -84,6 +84,17 @@ func (cfg *config) isAllowed(rawURL string) bool {
 	path := parsedURL.Path
 
 	for _, rule := range cfg.robotsRules {
+		// Disallow //
+		if rule == "/" {
+			return false
+		}
+
+		// Exact match
+		if path == rule {
+			return false
+		}
+
+		// Child paths
 		if strings.HasPrefix(path, rule+"/") {
 			return false
 		}
