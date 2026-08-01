@@ -1,8 +1,10 @@
 # Gotcha
 
 [![CI](https://github.com/shubh1855/Gotcha/actions/workflows/ci.yml/badge.svg)](https://github.com/shubh1855/Gotcha/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/shubh1855/Gotcha/total)](https://github.com/shubh1855/Gotcha/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/shubh1855/Gotcha)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/shubh1855/Gotcha)](https://goreportcard.com/report/github.com/shubh1855/Gotcha)
 
 A fast, concurrent web crawler written in Go that recursively crawls websites, extracts structured page information, and exports the results as a JSON report.
 
