@@ -76,7 +76,7 @@ go build -o gotcha .
 
 ---
 
-## Usage / Quick start
+## Usage / Quick Start
 
 Run the crawler:
 
