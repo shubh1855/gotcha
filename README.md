@@ -10,6 +10,10 @@ A fast, concurrent web crawler written in Go that recursively crawls websites, r
 
 ---
 
+## Motivation
+
+To learn about concurrency in Golang and learn how websites show information to better learn about how to handle concurrent tasks.
+
 ## Table of Contents
 
 - [Features](#features)
@@ -72,7 +76,7 @@ go build -o gotcha .
 
 ---
 
-## Usage
+## Usage / Quick start
 
 Run the crawler:
 
