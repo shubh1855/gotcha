@@ -6,7 +6,23 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/shubh1855/Gotcha)](LICENSE)
 
-A fast, concurrent web crawler written in Go that recursively crawls websites, extracts structured page information, and exports the results as a JSON report.
+A fast, concurrent web crawler written in Go that recursively crawls websites, respects `robots.txt`, extracts structured page information, and exports the results as a deterministic JSON report.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Output](#output)
+- [Project Structure](#project-structure)
+- [How It Works](#how-it-works)
+- [Development](#development)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [Documentation](#documentation)
+- [License](#license)
 
 ---
 
@@ -18,7 +34,7 @@ A fast, concurrent web crawler written in Go that recursively crawls websites, e
 - Configurable User-Agent
 - URL normalization to avoid duplicate crawls
 - Automatic retry with exponential backoff for transient HTTP failures
-- robots.txt support
+- `robots.txt` support
 - Internal and external link classification
 - Crawl statistics and summary reporting
 - Structured logging using `log/slog`
@@ -193,6 +209,12 @@ Run static analysis:
 go vet ./...
 ```
 
+Format the code:
+
+```bash
+gofmt -w .
+```
+
 Build:
 
 ```bash
@@ -201,33 +223,95 @@ go build .
 
 ---
 
+## Contributing
+
+Contributions are welcome! Whether it's a bug fix, a new feature, documentation improvements, or performance optimizations, your help is appreciated.
+
+### Getting Started
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/shubh1855/Gotcha.git
+cd Gotcha
+go mod download
+```
+
+### Development Workflow
+
+1. Create a new branch from `main`.
+
+```bash
+git checkout -b feature/my-feature
+```
+
+2. Make your changes.
+
+3. Run the quality checks.
+
+```bash
+gofmt -w .
+go vet ./...
+go test ./...
+```
+
+4. Commit your changes using a descriptive commit message.
+
+Examples:
+
+```text
+feat(crawler): add crawl depth support
+fix(fetch): handle redirect loops
+docs: update README
+```
+
+5. Push your branch and open a Pull Request.
+
+### Pull Request Checklist
+
+Before opening a Pull Request, please ensure:
+
+- [ ] Code is formatted with `gofmt`
+- [ ] `go vet ./...` passes
+- [ ] `go test ./...` passes
+- [ ] Documentation has been updated if required
+- [ ] `CHANGELOG.md` has been updated for user-facing changes
+
+### Reporting Issues
+
+If you encounter a bug or have a feature request, please open a GitHub Issue with:
+
+- A clear description of the problem
+- Steps to reproduce (for bugs)
+- Expected behavior
+- Relevant logs or screenshots (if applicable)
+
+---
+
 ## Roadmap
 
-This project is actively being improved. Planned enhancements include:
+### v0.6.0
 
-- [x] More robust HTTP error handling and retry logic
-- [ ] Better handling of redirects, rate limiting, and timeouts
-- [x] Tracking internal vs. external links
-- [x] Crawl statistics and summary reporting
+- [ ] Better handling of redirects
+- [ ] Request rate limiting
+- [ ] Crawl depth limiting
 - [ ] Smarter duplicate detection
-- [x] Configurable User-Agent and request headers
-- [x] robots.txt support
 - [ ] Sitemap generation
-- [x] Structured logging
-- [ ] Benchmarking and performance improvements
-- [ ] Unit and integration test expansion
-- [x] GitHub Actions CI
-- [x] Automated release workflow
+- [ ] Benchmark suite
+- [ ] Additional export formats (CSV/Markdown)
+- [ ] `golangci-lint` integration
+- [ ] Increased unit and integration test coverage
 
 ---
 
 ## Documentation
 
 - [CHANGELOG](CHANGELOG.md)
+- [Releases](https://github.com/shubh1855/Gotcha/releases)
 - [LICENSE](LICENSE)
 
 ---
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE,,) file for details.
