@@ -3,6 +3,7 @@ package main
 import (
 	"net/url"
 	"sync"
+	"time"
 )
 
 type config struct {
@@ -16,6 +17,7 @@ type config struct {
 	userAgent          string
 	robotsRules        []string
 	maxDepth           int
+	requestDelay       time.Duration
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {
