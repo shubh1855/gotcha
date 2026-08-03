@@ -60,7 +60,16 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("GET %q: %w", rawURL, err)
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			logger.Warn(
+				"failed to close response body",
+				"url", rawURL,
+				"error", err,
+			)
+		}
+	}()
 
 	logger.Debug(
 		"received HTTP response",
