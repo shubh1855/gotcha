@@ -1,6 +1,7 @@
 # Gotcha
 
 [![CI](https://github.com/shubh1855/Gotcha/actions/workflows/ci.yml/badge.svg)](https://github.com/shubh1855/Gotcha/actions/workflows/ci.yml)
+[![Lint](https://github.com/shubh1855/Gotcha/actions/workflows/lint.yml/badge.svg)](https://github.com/shubh1855/Gotcha/actions/workflows/lint.yml)
 [![Latest Release](https://img.shields.io/github/v/release/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/shubh1855/Gotcha/total)](https://github.com/shubh1855/Gotcha/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/blob/main/go.mod)

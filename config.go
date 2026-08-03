@@ -15,6 +15,7 @@ type config struct {
 	stats              CrawlerStats
 	userAgent          string
 	robotsRules        []string
+	maxDepth           int
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {

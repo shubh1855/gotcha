@@ -14,6 +14,7 @@ const (
 	defaultMaxConcurrency = 5
 	defaultMaxPages       = 100
 	defaultUserAgent      = "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)"
+	defaultMaxDepth       = -1
 )
 
 func main() {
@@ -52,6 +53,12 @@ func main() {
 		"Print version information",
 	)
 
+	depth := flag.Int(
+		"depth",
+		defaultMaxDepth,
+		"Maximum crawl depth (-1 for unlimited)",
+	)
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
 		flag.PrintDefaults()
@@ -87,6 +94,7 @@ func main() {
 		slog.String("url", baseURL.String()),
 		slog.Int("concurrency", *concurrency),
 		slog.Int("max_pages", *pages),
+		slog.Int("max_depth", *depth),
 		slog.String("user_agent", *userAgent),
 	)
 
@@ -98,6 +106,7 @@ func main() {
 		wg:                 &sync.WaitGroup{},
 		maxPages:           *pages,
 		userAgent:          *userAgent,
+		maxDepth:           *depth,
 	}
 
 	if err := cfg.loadRobotsTxt(); err != nil {
@@ -111,7 +120,7 @@ func main() {
 
 	go func() {
 		cfg.concurrencyControl <- struct{}{}
-		cfg.crawlPage(baseURL.String())
+		cfg.crawlPage(baseURL.String(), 0)
 	}()
 
 	cfg.wg.Wait()
