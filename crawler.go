@@ -98,7 +98,7 @@ func (cfg *config) crawlPage(rawCurrentURL string, depth int) {
 	cfg.incrementPagesCrawled()
 
 	// stop here since we reached the max crawl depth
-	if cfg.maxDepth >= 0 && depth >= cfg.maxDepth {
+	if !cfg.shouldCrawlChildren(depth) {
 		return
 	}
 
@@ -110,4 +110,12 @@ func (cfg *config) crawlPage(rawCurrentURL string, depth int) {
 			cfg.crawlPage(link, depth+1)
 		}(link)
 	}
+}
+
+func (cfg *config) shouldCrawlChildren(depth int) bool {
+	if cfg.maxDepth < 0 {
+		return true
+	}
+
+	return depth < cfg.maxDepth
 }
