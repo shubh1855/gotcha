@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/url"
 )
@@ -20,7 +19,7 @@ func isSameDomain(rawBaseURL, rawCurrentURL string) bool {
 	return baseURL.Host == currentURL.Host
 }
 
-func (cfg *config) crawlPage(rawCurrentURL string) {
+func (cfg *config) crawlPage(rawCurrentURL string, depth int) {
 	defer cfg.wg.Done()
 
 	defer func() {
@@ -73,7 +72,11 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	html, err := cfg.getHTML(rawCurrentURL)
 	if err != nil {
-		fmt.Printf("warning: %v\n", err)
+		logger.Warn(
+			"failed to fetch page",
+			slog.String("url", rawCurrentURL),
+			slog.Any("error", err),
+		)
 		cfg.incrementFailedFetches()
 		return
 	}
@@ -94,12 +97,17 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 
 	cfg.incrementPagesCrawled()
 
+	// stop here since we reached the max crawl depth
+	if cfg.maxDepth >= 0 && depth >= cfg.maxDepth {
+		return
+	}
+
 	for _, link := range pageData.InternalLinks {
 		cfg.wg.Add(1)
 
 		go func(link string) {
 			cfg.concurrencyControl <- struct{}{}
-			cfg.crawlPage(link)
+			cfg.crawlPage(link, depth+1)
 		}(link)
 	}
 }
