@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"sync"
+	"time"
 
 	flag "github.com/spf13/pflag"
 )
@@ -15,6 +16,7 @@ const (
 	defaultMaxPages       = 100
 	defaultUserAgent      = "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)"
 	defaultMaxDepth       = -1
+	defaultRequestDelay   = 0 * time.Second
 )
 
 func main() {
@@ -59,6 +61,13 @@ func main() {
 		"Maximum crawl depth (-1 for unlimited)",
 	)
 
+	delay := flag.DurationP(
+		"delay",
+		"d",
+		defaultRequestDelay,
+		"Delay between HTTP requests",
+	)
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
 		flag.PrintDefaults()
@@ -96,6 +105,7 @@ func main() {
 		slog.Int("max_pages", *pages),
 		slog.Int("max_depth", *depth),
 		slog.String("user_agent", *userAgent),
+		slog.Duration("request_delay", *delay),
 	)
 
 	cfg := &config{
@@ -107,6 +117,7 @@ func main() {
 		maxPages:           *pages,
 		userAgent:          *userAgent,
 		maxDepth:           *depth,
+		requestDelay:       *delay,
 	}
 
 	if err := cfg.loadRobotsTxt(); err != nil {

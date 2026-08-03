@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
@@ -42,7 +43,24 @@ func shouldRetry(err error) bool {
 	return false
 }
 
+// waitBeforeRequest applies the configured delay before issuing
+// each HTTP request.
+func (cfg *config) waitBeforeRequest() {
+	if cfg.requestDelay <= 0 {
+		return
+	}
+
+	logger.Debug(
+		"waiting before request",
+		slog.Duration("delay", cfg.requestDelay),
+	)
+
+	time.Sleep(cfg.requestDelay)
+}
+
 func (cfg *config) fetchHTML(rawURL string) (string, error) {
+	cfg.waitBeforeRequest()
+
 	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("create request for %q: %w", rawURL, err)
@@ -52,8 +70,8 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 
 	logger.Debug(
 		"sending HTTP request",
-		"url", rawURL,
-		"user_agent", cfg.userAgent,
+		slog.String("url", rawURL),
+		slog.String("user_agent", cfg.userAgent),
 	)
 
 	resp, err := httpClient.Do(req)
@@ -65,16 +83,16 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 		if err := resp.Body.Close(); err != nil {
 			logger.Warn(
 				"failed to close response body",
-				"url", rawURL,
-				"error", err,
+				slog.String("url", rawURL),
+				slog.Any("error", err),
 			)
 		}
 	}()
 
 	logger.Debug(
 		"received HTTP response",
-		"url", rawURL,
-		"status", resp.StatusCode,
+		slog.String("url", rawURL),
+		slog.Int("status", resp.StatusCode),
 	)
 
 	if resp.StatusCode != http.StatusOK {
@@ -100,8 +118,8 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 
 	logger.Debug(
 		"downloaded page",
-		"url", rawURL,
-		"bytes", len(body),
+		slog.String("url", rawURL),
+		slog.Int("bytes", len(body)),
 	)
 
 	return string(body), nil
@@ -128,11 +146,11 @@ func (cfg *config) getHTML(rawURL string) (string, error) {
 
 		logger.Warn(
 			"retrying request",
-			"url", rawURL,
-			"attempt", attempt+1,
-			"max_attempts", maxRetries,
-			"delay", delay,
-			"error", err,
+			slog.String("url", rawURL),
+			slog.Int("attempt", attempt+1),
+			slog.Int("max_attempts", maxRetries),
+			slog.Duration("delay", delay),
+			slog.Any("error", err),
 		)
 
 		time.Sleep(delay)
@@ -140,9 +158,9 @@ func (cfg *config) getHTML(rawURL string) (string, error) {
 
 	logger.Error(
 		"request failed",
-		"url", rawURL,
-		"retries", maxRetries,
-		"error", err,
+		slog.String("url", rawURL),
+		slog.Int("retries", maxRetries),
+		slog.Any("error", err),
 	)
 
 	return "", fmt.Errorf(
