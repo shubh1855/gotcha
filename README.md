@@ -11,10 +11,6 @@ A fast, concurrent web crawler written in Go that recursively crawls websites, r
 
 ---
 
-## Motivation
-
-To learn about concurrency in Golang and learn how websites show information to better learn about how to handle concurrent tasks.
-
 ## Table of Contents
 
 - [Features](#features)
@@ -36,6 +32,8 @@ To learn about concurrency in Golang and learn how websites show information to 
 - Recursive crawling within a single domain
 - Configurable concurrency limit
 - Configurable maximum page limit
+- Configurable crawl depth
+- Configurable request delay
 - Configurable User-Agent
 - URL normalization to avoid duplicate crawls
 - Automatic retry with exponential backoff for transient HTTP failures
@@ -77,48 +75,94 @@ go build -o gotcha .
 
 ---
 
-## Usage / Quick Start
+## Usage
 
 Run the crawler:
 
 ```bash
-go run . <url> [maxConcurrency] [maxPages] [userAgent]
+gotcha . [flags] <url>
+```
+
+Show all available options:
+
+```bash
+gotcha . --help
 ```
 
 ### Examples
 
-Crawl using default settings:
+Crawl a website using the default configuration:
 
 ```bash
-go run . https://example.com
+gotcha . https://example.com
 ```
 
-Specify maximum concurrency:
+Limit concurrency:
 
 ```bash
-go run . https://example.com 10
+gotcha . --concurrency 10 https://example.com
 ```
 
-Specify concurrency and maximum pages:
+Limit the number of pages:
 
 ```bash
-go run . https://example.com 10 200
+gotcha . --pages 200 https://example.com
 ```
 
-Specify a custom User-Agent:
+Limit crawl depth:
 
 ```bash
-go run . https://example.com 10 200 "MyCrawler/1.0"
+gotcha . --depth 3 https://example.com
 ```
 
-### Arguments
+Add a delay between requests:
 
-| Argument        | Description                      | Default                                             |
-| --------------- | -------------------------------- | --------------------------------------------------- |
-| URL             | Starting URL                     | **Required**                                        |
-| Max Concurrency | Maximum concurrent crawl workers | `5`                                                 |
-| Max Pages       | Maximum pages to crawl           | `100`                                               |
-| User-Agent      | HTTP User-Agent                  | `Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)` |
+```bash
+gotcha . --delay 500ms https://example.com
+```
+
+Use a custom User-Agent:
+
+```bash
+gotcha . --user-agent "MyCrawler/1.0" https://example.com
+```
+
+Enable verbose logging:
+
+```bash
+gotcha . --verbose https://example.com
+```
+
+Print version information:
+
+```bash
+gotcha . --version
+```
+
+Example using multiple options:
+
+```bash
+gotcha . \
+    --concurrency 10 \
+    --pages 200 \
+    --depth 3 \
+    --delay 500ms \
+    --user-agent "MyCrawler/1.0" \
+    --verbose \
+    https://example.com
+```
+
+### Available Flags
+
+| Flag            | Short | Description                            | Default                                             |
+| --------------- | :---: | -------------------------------------- | --------------------------------------------------- |
+| `--concurrency` | `-c`  | Maximum concurrent requests            | `5`                                                 |
+| `--pages`       | `-p`  | Maximum pages to crawl                 | `100`                                               |
+| `--depth`       |   —   | Maximum crawl depth (`-1` = unlimited) | `-1`                                                |
+| `--delay`       | `-d`  | Delay before each HTTP request         | `0s`                                                |
+| `--user-agent`  | `-u`  | HTTP User-Agent                        | `Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)` |
+| `--verbose`     | `-v`  | Enable debug logging                   | `false`                                             |
+| `--version`     | `-V`  | Print version information              | `false`                                             |
 
 ---
 
@@ -298,13 +342,13 @@ If you encounter a bug or have a feature request, please open a GitHub Issue wit
 ### v0.6.0
 
 - [ ] Better handling of redirects
-- [ ] Request rate limiting
-- [ ] Crawl depth limiting
+- [x] Request rate limiting
+- [x] Crawl depth limiting
 - [ ] Smarter duplicate detection
 - [ ] Sitemap generation
 - [ ] Benchmark suite
 - [ ] Additional export formats (CSV/Markdown)
-- [ ] `golangci-lint` integration
+- [x] `golangci-lint` integration
 - [ ] Increased unit and integration test coverage
 
 ---
@@ -313,10 +357,9 @@ If you encounter a bug or have a feature request, please open a GitHub Issue wit
 
 - [CHANGELOG](CHANGELOG.md)
 - [Releases](https://github.com/shubh1855/Gotcha/releases)
-- [LICENSE](LICENSE)
 
 ---
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE,,) file for details.
+This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for details.
