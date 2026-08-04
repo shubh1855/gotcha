@@ -80,13 +80,13 @@ go build -o gotcha .
 Run the crawler:
 
 ```bash
-gotcha . [flags] <url>
+gotcha [flags] <url>
 ```
 
 Show all available options:
 
 ```bash
-gotcha . --help
+gotcha --help
 ```
 
 ### Examples
@@ -94,55 +94,55 @@ gotcha . --help
 Crawl a website using the default configuration:
 
 ```bash
-gotcha . https://example.com
+gotcha https://example.com
 ```
 
 Limit concurrency:
 
 ```bash
-gotcha . --concurrency 10 https://example.com
+gotcha --concurrency 10 https://example.com
 ```
 
 Limit the number of pages:
 
 ```bash
-gotcha . --pages 200 https://example.com
+gotcha --pages 200 https://example.com
 ```
 
 Limit crawl depth:
 
 ```bash
-gotcha . --depth 3 https://example.com
+gotcha --depth 3 https://example.com
 ```
 
 Add a delay between requests:
 
 ```bash
-gotcha . --delay 500ms https://example.com
+gotcha --delay 500ms https://example.com
 ```
 
 Use a custom User-Agent:
 
 ```bash
-gotcha . --user-agent "MyCrawler/1.0" https://example.com
+gotcha --user-agent "MyCrawler/1.0" https://example.com
 ```
 
 Enable verbose logging:
 
 ```bash
-gotcha . --verbose https://example.com
+gotcha --verbose https://example.com
 ```
 
 Print version information:
 
 ```bash
-gotcha . --version
+gotcha --version
 ```
 
 Example using multiple options:
 
 ```bash
-gotcha . \
+gotcha \
     --concurrency 10 \
     --pages 200 \
     --depth 3 \
