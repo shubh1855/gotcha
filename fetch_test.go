@@ -21,7 +21,9 @@ func newTestConfig(maxRedirects int) *config {
 
 func TestFetchHTML_NoRedirect(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "<html><body>Hello</body></html>")
+		if _, err := fmt.Fprint(w, "<html><body>Hello</body></html>"); err != nil {
+			t.Fatalf("failed to write response: %v", err)
+		}
 	}))
 	defer server.Close()
 
@@ -45,7 +47,9 @@ func TestFetchHTML_SingleRedirect(t *testing.T) {
 	})
 
 	mux.HandleFunc("/final", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "<html><body>Redirect Success</body></html>")
+		if _, err := fmt.Fprint(w, "<html><body>Redirect Success</body></html>"); err != nil {
+			t.Fatalf("failed to write response: %v", err)
+		}
 	})
 
 	server := httptest.NewServer(mux)
@@ -75,7 +79,9 @@ func TestFetchHTML_TooManyRedirects(t *testing.T) {
 	})
 
 	mux.HandleFunc("/b", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "<html><body>Done</body></html>")
+		if _, err := fmt.Fprint(w, "<html><body>Done</body></html>"); err != nil {
+			t.Fatalf("failed to write response: %v", err)
+		}
 	})
 
 	server := httptest.NewServer(mux)
