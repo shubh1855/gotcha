@@ -35,6 +35,8 @@ A fast, concurrent web crawler written in Go that recursively crawls websites, r
 - Configurable crawl depth
 - Configurable request delay
 - Configurable User-Agent
+- Configurable request rate limiting
+- Configurable HTTP redirect handling
 - URL normalization to avoid duplicate crawls
 - Automatic retry with exponential backoff for transient HTTP failures
 - `robots.txt` support
@@ -121,6 +123,12 @@ Add a delay between requests:
 gotcha --delay 500ms https://example.com
 ```
 
+Rate limit HTTP requests:
+
+```bash
+gotcha --rate 5 https://example.com
+```
+
 Use a custom User-Agent:
 
 ```bash
@@ -154,15 +162,17 @@ gotcha \
 
 ### Available Flags
 
-| Flag            | Short | Description                            | Default                                             |
-| --------------- | :---: | -------------------------------------- | --------------------------------------------------- |
-| `--concurrency` | `-c`  | Maximum concurrent requests            | `5`                                                 |
-| `--pages`       | `-p`  | Maximum pages to crawl                 | `100`                                               |
-| `--depth`       |   —   | Maximum crawl depth (`-1` = unlimited) | `-1`                                                |
-| `--delay`       | `-d`  | Delay before each HTTP request         | `0s`                                                |
-| `--user-agent`  | `-u`  | HTTP User-Agent                        | `Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)` |
-| `--verbose`     | `-v`  | Enable debug logging                   | `false`                                             |
-| `--version`     | `-V`  | Print version information              | `false`                                             |
+| Flag                  | Description                                                   | Default            |
+| --------------------- | ------------------------------------------------------------- | ------------------ |
+| `-c, --concurrency`   | Maximum concurrent requests                                   | `5`                |
+| `-p, --pages`         | Maximum pages to crawl                                        | `100`              |
+| `--depth`             | Maximum crawl depth (`-1` = unlimited)                        | `-1`               |
+| `-u, --user-agent`    | HTTP User-Agent                                               | `Gotcha/1.0 (...)` |
+| `-d, --delay`         | Fixed delay between requests                                  | `0s`               |
+| `-r, --max-redirects` | Maximum redirects to follow                                   | `10`               |
+| `--rate`              | Maximum HTTP requests per second (`0` disables rate limiting) | `0`                |
+| `-v, --verbose`       | Enable debug logging                                          | `false`            |
+| `-V, --version`       | Print version information                                     | `false`            |
 
 ---
 
@@ -339,17 +349,14 @@ If you encounter a bug or have a feature request, please open a GitHub Issue wit
 
 ## Roadmap
 
-### v0.6.0
+### v0.8.0
 
-- [ ] Better handling of redirects
-- [x] Request rate limiting
-- [x] Crawl depth limiting
-- [ ] Smarter duplicate detection
+- [ ] Smarter duplicate URL detection
 - [ ] Sitemap generation
+- [ ] CSV export
+- [ ] Markdown export
 - [ ] Benchmark suite
-- [ ] Additional export formats (CSV/Markdown)
-- [x] `golangci-lint` integration
-- [ ] Increased unit and integration test coverage
+- [ ] Expanded integration test coverage
 
 ---
 

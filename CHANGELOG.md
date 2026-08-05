@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-08-05
+
+### Added
+
+- Configurable HTTP redirect handling
+- Configurable request rate limiting
+- `--max-redirects` CLI flag
+- `--rate` CLI flag
+- Integration tests for HTTP redirects
+
 ## [0.6.0] - 2026-08-03
 
 ### Added
