@@ -16,7 +16,7 @@ const (
 	baseBackoff = 500 * time.Millisecond
 )
 
-func (cfg *config) httpClient() *http.Client {
+func (cfg *config) newHTTPClient() *http.Client {
 	return &http.Client{
 		Timeout: 15 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -92,8 +92,7 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 		slog.String("user_agent", cfg.userAgent),
 	)
 
-	client := cfg.httpClient()
-	resp, err := client.Do(req)
+	resp, err := cfg.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("GET %q: %w", rawURL, err)
 	}

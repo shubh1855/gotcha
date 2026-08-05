@@ -129,6 +129,8 @@ func main() {
 		maxRedirects:       *redirects,
 	}
 
+	cfg.client = cfg.newHTTPClient()
+
 	if err := cfg.loadRobotsTxt(); err != nil {
 		logger.Warn(
 			"failed to load robots.txt",

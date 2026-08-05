@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -19,6 +20,7 @@ type config struct {
 	maxDepth           int
 	requestDelay       time.Duration
 	maxRedirects       int
+	client             *http.Client
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {
