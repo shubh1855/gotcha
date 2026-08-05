@@ -17,6 +17,7 @@ const (
 	defaultUserAgent      = "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)"
 	defaultMaxDepth       = -1
 	defaultRequestDelay   = 0 * time.Second
+	defaultMaxRedirects   = 10
 )
 
 func main() {
@@ -68,6 +69,12 @@ func main() {
 		"Delay between HTTP requests",
 	)
 
+	redirects := flag.IntP(
+		"max-redirects",
+		"r",
+		defaultMaxRedirects,
+		"Maximum number of HTTP redirects")
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
 		flag.PrintDefaults()
@@ -104,8 +111,9 @@ func main() {
 		slog.Int("concurrency", *concurrency),
 		slog.Int("max_pages", *pages),
 		slog.Int("max_depth", *depth),
-		slog.String("user_agent", *userAgent),
 		slog.Duration("request_delay", *delay),
+		slog.Int("max_redirects", *redirects),
+		slog.String("user_agent", *userAgent),
 	)
 
 	cfg := &config{
@@ -118,7 +126,10 @@ func main() {
 		userAgent:          *userAgent,
 		maxDepth:           *depth,
 		requestDelay:       *delay,
+		maxRedirects:       *redirects,
 	}
+
+	cfg.client = cfg.newHTTPClient()
 
 	if err := cfg.loadRobotsTxt(); err != nil {
 		logger.Warn(
