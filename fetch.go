@@ -16,8 +16,26 @@ const (
 	baseBackoff = 500 * time.Millisecond
 )
 
-var httpClient = &http.Client{
-	Timeout: 15 * time.Second,
+func (cfg *config) httpClient() *http.Client {
+	return &http.Client{
+		Timeout: 15 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= cfg.maxRedirects {
+				return fmt.Errorf(
+					"stopped after %d redirects",
+					cfg.maxRedirects,
+				)
+			}
+
+			logger.Debug(
+				"following redirect",
+				slog.String("from", via[len(via)-1].URL.String()),
+				slog.String("to", req.URL.String()),
+			)
+
+			return nil
+		},
+	}
 }
 
 func backoff(attempt int) time.Duration {
@@ -74,7 +92,8 @@ func (cfg *config) fetchHTML(rawURL string) (string, error) {
 		slog.String("user_agent", cfg.userAgent),
 	)
 
-	resp, err := httpClient.Do(req)
+	client := cfg.httpClient()
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("GET %q: %w", rawURL, err)
 	}
