@@ -7,7 +7,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/shubh1855/Gotcha)](LICENSE)
 
-A fast, concurrent web crawler written in Go that recursively crawls websites, respects `robots.txt`, extracts structured page information, and exports the results as a deterministic JSON report.
+A fast, concurrent web crawler written in Go that recursively crawls websites, respects `robots.txt`, supports configurable redirects and rate limiting, extracts structured page information, and exports deterministic JSON reports.
 
 ---
 
