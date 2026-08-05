@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type config struct {
@@ -21,6 +23,9 @@ type config struct {
 	requestDelay       time.Duration
 	maxRedirects       int
 	client             *http.Client
+
+	requestsPerSecond float64
+	limiter           *rate.Limiter
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {

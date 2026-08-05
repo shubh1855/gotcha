@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -63,21 +64,27 @@ func shouldRetry(err error) bool {
 
 // waitBeforeRequest applies the configured delay before issuing
 // each HTTP request.
-func (cfg *config) waitBeforeRequest() {
-	if cfg.requestDelay <= 0 {
-		return
+func (cfg *config) waitBeforeRequest() error {
+	if cfg.limiter != nil {
+		if err := cfg.limiter.Wait(context.Background()); err != nil {
+			return err
+		}
 	}
 
-	logger.Debug(
-		"waiting before request",
-		slog.Duration("delay", cfg.requestDelay),
-	)
-
-	time.Sleep(cfg.requestDelay)
+	if cfg.requestDelay > 0 {
+		logger.Debug(
+			"waiting before request",
+			slog.Duration("delay", cfg.requestDelay),
+		)
+		time.Sleep(cfg.requestDelay)
+	}
+	return nil
 }
 
 func (cfg *config) fetchHTML(rawURL string) (string, error) {
-	cfg.waitBeforeRequest()
+	if err := cfg.waitBeforeRequest(); err != nil {
+		return "", fmt.Errorf("wait before request: %w", err)
+	}
 
 	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
 	if err != nil {

@@ -9,15 +9,17 @@ import (
 	"time"
 
 	flag "github.com/spf13/pflag"
+	"golang.org/x/time/rate"
 )
 
 const (
-	defaultMaxConcurrency = 5
-	defaultMaxPages       = 100
-	defaultUserAgent      = "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)"
-	defaultMaxDepth       = -1
-	defaultRequestDelay   = 0 * time.Second
-	defaultMaxRedirects   = 10
+	defaultMaxConcurrency    = 5
+	defaultMaxPages          = 100
+	defaultUserAgent         = "Gotcha/1.0 (+https://github.com/shubh1855/Gotcha)"
+	defaultMaxDepth          = -1
+	defaultRequestDelay      = 0 * time.Second
+	defaultMaxRedirects      = 10
+	defaultRequestsPerSecond = 0.0
 )
 
 func main() {
@@ -73,7 +75,14 @@ func main() {
 		"max-redirects",
 		"r",
 		defaultMaxRedirects,
-		"Maximum number of HTTP redirects")
+		"Maximum number of HTTP redirects",
+	)
+
+	requestsPerSecond := flag.Float64(
+		"rate",
+		defaultRequestsPerSecond,
+		"Maximum HTTP requests per second (0 disables rate limiting)",
+	)
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
@@ -111,8 +120,9 @@ func main() {
 		slog.Int("concurrency", *concurrency),
 		slog.Int("max_pages", *pages),
 		slog.Int("max_depth", *depth),
-		slog.Duration("request_delay", *delay),
 		slog.Int("max_redirects", *redirects),
+		slog.Float64("requests_per_second", *requestsPerSecond),
+		slog.Duration("request_delay", *delay),
 		slog.String("user_agent", *userAgent),
 	)
 
@@ -127,6 +137,14 @@ func main() {
 		maxDepth:           *depth,
 		requestDelay:       *delay,
 		maxRedirects:       *redirects,
+		requestsPerSecond:  *requestsPerSecond,
+	}
+
+	if cfg.requestsPerSecond > 0 {
+		cfg.limiter = rate.NewLimiter(
+			rate.Limit(cfg.requestsPerSecond),
+			1,
+		)
 	}
 
 	cfg.client = cfg.newHTTPClient()
