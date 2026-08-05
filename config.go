@@ -18,6 +18,7 @@ type config struct {
 	robotsRules        []string
 	maxDepth           int
 	requestDelay       time.Duration
+	maxRedirects       int
 }
 
 func (cfg *config) addPageVisit(normalizedURL string) bool {
