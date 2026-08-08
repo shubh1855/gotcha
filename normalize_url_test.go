@@ -4,86 +4,80 @@ import "testing"
 
 func TestNormalizeURL(t *testing.T) {
 	tests := []struct {
-		name     string
-		inputURL string
-		expected string
-		wantErr  bool
+		name    string
+		input   string
+		want    string
+		wantErr bool
 	}{
 		{
-			name:     "remove https scheme",
-			inputURL: "https://www.boot.dev/blog/path",
-			expected: "www.boot.dev/blog/path",
+			name:  "remove fragment",
+			input: "https://example.com/about#team",
+			want:  "https://example.com/about",
 		},
 		{
-			name:     "remove http scheme",
-			inputURL: "http://www.boot.dev/blog/path",
-			expected: "www.boot.dev/blog/path",
+			name:  "remove trailing slash",
+			input: "https://example.com/about/",
+			want:  "https://example.com/about",
 		},
 		{
-			name:     "lowercase host",
-			inputURL: "https://WWW.BOOT.DEV/blog/path",
-			expected: "www.boot.dev/blog/path",
+			name:  "preserve root slash",
+			input: "https://example.com/",
+			want:  "https://example.com/",
 		},
 		{
-			name:     "lowercase path",
-			inputURL: "https://www.boot.dev/BLOG/PATH",
-			expected: "www.boot.dev/blog/path",
+			name:  "remove utm parameter",
+			input: "https://example.com/about?utm_source=github",
+			want:  "https://example.com/about",
 		},
 		{
-			name:     "remove trailing slash",
-			inputURL: "https://www.boot.dev/blog/path/",
-			expected: "www.boot.dev/blog/path",
+			name:  "remove multiple tracking parameters",
+			input: "https://example.com/about?utm_source=github&fbclid=123&gclid=456",
+			want:  "https://example.com/about",
 		},
 		{
-			name:     "root url trailing slash",
-			inputURL: "https://www.boot.dev/",
-			expected: "www.boot.dev",
+			name:  "preserve meaningful query parameter",
+			input: "https://example.com/product?id=123",
+			want:  "https://example.com/product?id=123",
 		},
 		{
-			name:     "query parameters ignored",
-			inputURL: "https://www.boot.dev/blog/path?sort=desc",
-			expected: "www.boot.dev/blog/path",
+			name:  "remove tracking while preserving meaningful query",
+			input: "https://example.com/product?utm_source=github&id=123",
+			want:  "https://example.com/product?id=123",
 		},
 		{
-			name:     "fragment ignored",
-			inputURL: "https://www.boot.dev/blog/path#section1",
-			expected: "www.boot.dev/blog/path",
+			name:  "sort query parameters",
+			input: "https://example.com/search?z=3&a=1&m=2",
+			want:  "https://example.com/search?a=1&m=2&z=3",
 		},
 		{
-			name:     "query and fragment ignored",
-			inputURL: "https://www.boot.dev/blog/path/?id=1#top",
-			expected: "www.boot.dev/blog/path",
+			name:  "normalize scheme and host",
+			input: "HTTPS://EXAMPLE.COM/About",
+			want:  "https://example.com/About",
 		},
 		{
-			name:     "no path",
-			inputURL: "https://www.boot.dev",
-			expected: "www.boot.dev",
-		},
-		{
-			name:     "invalid url",
-			inputURL: "://invalid-url",
-			wantErr:  true,
+			name:    "invalid URL",
+			input:   "://invalid",
+			wantErr: true,
 		},
 	}
 
-	for i, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			actual, err := normalizeURL(tc.inputURL)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := normalizeURL(tt.input)
 
-			if tc.wantErr {
+			if tt.wantErr {
 				if err == nil {
-					t.Errorf("Test %d - %s FAIL: expected error", i, tc.name)
+					t.Fatal("expected error, got nil")
 				}
 				return
 			}
 
 			if err != nil {
-				t.Errorf("Test %d - %s FAIL: unexpected error: %v", i, tc.name, err)
-				return
+				t.Fatalf("unexpected error: %v", err)
 			}
 
-			if actual != tc.expected {
-				t.Errorf("Test %d - %s FAIL: expected %q, got %q", i, tc.name, tc.expected, actual)
+			if got != tt.want {
+				t.Errorf("normalizeURL() = %q, want %q", got, tt.want)
 			}
 		})
 	}
