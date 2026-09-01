@@ -330,11 +330,11 @@ docs: update README
 
 Before opening a Pull Request, please ensure:
 
-- [ ] Code is formatted with `gofmt`
-- [ ] `go vet ./...` passes
-- [ ] `go test ./...` passes
-- [ ] Documentation has been updated if required
-- [ ] `CHANGELOG.md` has been updated for user-facing changes
+- [x] Code is formatted with `gofmt`
+- [x] `go vet ./...` passes
+- [x] `go test ./...` passes
+- [x] Documentation has been updated if required
+- [x] `CHANGELOG.md` has been updated for user-facing changes
 
 ### Reporting Issues
 
