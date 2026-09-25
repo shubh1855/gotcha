@@ -84,8 +84,18 @@ func main() {
 		"Maximum HTTP requests per second (0 disables rate limiting)",
 	)
 
+	sitemap := flag.Bool(
+		"sitemap",
+		false,
+		"Generate a sitemap.xml file",
+	)
+
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <url>\n\n", os.Args[0])
+		_, _ = fmt.Fprintf(
+			os.Stderr,
+			"Usage: %s [flags] <url>\n\n",
+			os.Args[0],
+		)
 		flag.PrintDefaults()
 	}
 
@@ -124,6 +134,7 @@ func main() {
 		slog.Float64("requests_per_second", *requestsPerSecond),
 		slog.Duration("request_delay", *delay),
 		slog.String("user_agent", *userAgent),
+		slog.Bool("sitemap", *sitemap),
 	)
 
 	cfg := &config{
@@ -187,4 +198,19 @@ func main() {
 		"JSON report written",
 		slog.String("path", "report.json"),
 	)
+
+	if *sitemap {
+		if err := writeSitemap(cfg.pages, "sitemap.xml"); err != nil {
+			logger.Error(
+				"failed to write sitemap",
+				slog.Any("error", err),
+			)
+			os.Exit(1)
+		}
+
+		logger.Info(
+			"sitemap written",
+			slog.String("path", "sitemap.xml"),
+		)
+	}
 }
