@@ -90,6 +90,12 @@ func main() {
 		"Generate a sitemap.xml file",
 	)
 
+	csvOutput := flag.Bool(
+		"csv",
+		false,
+		"Generate a crawl.csv file",
+	)
+
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(
 			os.Stderr,
@@ -135,6 +141,7 @@ func main() {
 		slog.Duration("request_delay", *delay),
 		slog.String("user_agent", *userAgent),
 		slog.Bool("sitemap", *sitemap),
+		slog.Bool("csv", *csvOutput),
 	)
 
 	cfg := &config{
@@ -211,6 +218,21 @@ func main() {
 		logger.Info(
 			"sitemap written",
 			slog.String("path", "sitemap.xml"),
+		)
+	}
+
+	if *csvOutput {
+		if err := writeCSVReport(cfg.pages, "crawl.csv"); err != nil {
+			logger.Error(
+				"failed to write CSV report",
+				slog.Any("error", err),
+			)
+			os.Exit(1)
+		}
+
+		logger.Info(
+			"CSV report written",
+			slog.String("path", "crawl.csv"),
 		)
 	}
 }
