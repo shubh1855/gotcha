@@ -26,15 +26,6 @@ func (cfg *config) crawlPage(rawCurrentURL string, depth int) {
 		<-cfg.concurrencyControl
 	}()
 
-	cfg.mu.Lock()
-	reachedLimit := len(cfg.pages) >= cfg.maxPages
-	cfg.mu.Unlock()
-
-	if reachedLimit {
-		cfg.incrementSkippedPages()
-		return
-	}
-
 	if !isSameDomain(cfg.baseURL.String(), rawCurrentURL) {
 		cfg.incrementSkippedPages()
 		return

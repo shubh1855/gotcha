@@ -36,6 +36,11 @@ func (cfg *config) addPageVisit(normalizedURL string) bool {
 		return false
 	}
 
+	if len(cfg.pages) >= cfg.maxPages {
+		return false
+	}
+
 	cfg.pages[normalizedURL] = PageData{}
+
 	return true
 }
