@@ -7,7 +7,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/shubh1855/Gotcha)](https://github.com/shubh1855/Gotcha/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/shubh1855/Gotcha)](LICENSE)
 
-A fast, concurrent web crawler written in Go that recursively crawls websites, respects `robots.txt`, supports configurable redirects and rate limiting, extracts structured page information, and exports deterministic JSON reports.
+A fast, concurrent web crawler written in Go that recursively crawls websites, respects `robots.txt`, supports configurable redirects and rate limiting, extracts structured page information, and exports deterministic reports in JSON, CSV, Markdown, and XML sitemap formats.
 
 ---
 
@@ -16,6 +16,7 @@ A fast, concurrent web crawler written in Go that recursively crawls websites, r
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Example Output](#example-output)
 - [Output](#output)
 - [Project Structure](#project-structure)
 - [How It Works](#how-it-works)
@@ -51,6 +52,13 @@ A fast, concurrent web crawler written in Go that recursively crawls websites, r
   - Outgoing links
   - Image URLs
 - Deterministic JSON report generation
+- XML sitemap generation with `--sitemap`
+- CSV report generation with `--csv`
+- Markdown report generation with `--markdown`
+- Deterministic output ordering across report formats
+- Benchmark suite for URL normalization and page extraction
+- Integration tests for crawler behavior
+- Race-condition testing with Go's race detector
 
 ---
 
@@ -135,10 +143,44 @@ Use a custom User-Agent:
 gotcha --user-agent "MyCrawler/1.0" https://example.com
 ```
 
+Limit HTTP redirects:
+
+```bash
+gotcha --max-redirects 5 https://example.com
+```
+
 Enable verbose logging:
 
 ```bash
 gotcha --verbose https://example.com
+```
+
+Generate an XML sitemap:
+
+```bash
+gotcha --sitemap https://example.com
+```
+
+Generate a CSV report:
+
+```bash
+gotcha --csv https://example.com
+```
+
+Generate a Markdown report:
+
+```bash
+gotcha --markdown https://example.com
+```
+
+Generate all available reports:
+
+```bash
+gotcha \
+    --sitemap \
+    --csv \
+    --markdown \
+    https://example.com
 ```
 
 Print version information:
@@ -155,7 +197,12 @@ gotcha \
     --pages 200 \
     --depth 3 \
     --delay 500ms \
+    --rate 5 \
+    --max-redirects 5 \
     --user-agent "MyCrawler/1.0" \
+    --sitemap \
+    --csv \
+    --markdown \
     --verbose \
     https://example.com
 ```
@@ -171,12 +218,17 @@ gotcha \
 | `-d, --delay`         | Fixed delay between requests                                  | `0s`               |
 | `-r, --max-redirects` | Maximum redirects to follow                                   | `10`               |
 | `--rate`              | Maximum HTTP requests per second (`0` disables rate limiting) | `0`                |
+| `--sitemap`           | Generate `sitemap.xml`                                        | `false`            |
+| `--csv`               | Generate `crawl.csv`                                          | `false`            |
+| `--markdown`          | Generate `crawl.md`                                           | `false`            |
 | `-v, --verbose`       | Enable debug logging                                          | `false`            |
 | `-V, --version`       | Print version information                                     | `false`            |
 
 ---
 
 ## Example Output
+
+During a crawl, Gotcha reports crawl progress and statistics:
 
 ```text
 Starting crawl of https://example.com
@@ -191,23 +243,155 @@ External links: 12
 JSON report written to report.json
 ```
 
+When optional exports are enabled, Gotcha also reports the generated files:
+
+```text
+JSON report written to report.json
+Sitemap written to sitemap.xml
+CSV report written to crawl.csv
+Markdown report written to crawl.md
+```
+
 ---
 
 ## Output
 
-After crawling completes, a `report.json` file is generated containing the extracted page information.
+Every crawl generates a deterministic JSON report:
 
-Each record contains:
+```text
+report.json
+```
+
+Additional report formats can be generated using the corresponding flags.
+
+| Flag         | Output        | Description                          |
+| ------------ | ------------- | ------------------------------------ |
+| `--sitemap`  | `sitemap.xml` | XML sitemap containing crawled URLs  |
+| `--csv`      | `crawl.csv`   | Tabular crawl data                   |
+| `--markdown` | `crawl.md`    | Human-readable Markdown crawl report |
+
+For example:
+
+```bash
+gotcha \
+    --sitemap \
+    --csv \
+    --markdown \
+    https://example.com
+```
+
+Generates:
+
+```text
+report.json
+sitemap.xml
+crawl.csv
+crawl.md
+```
+
+### JSON
+
+The JSON report contains structured information about each crawled page:
 
 ```json
 {
   "url": "https://example.com",
   "heading": "Example Domain",
   "first_paragraph": "This domain is for use in illustrative examples in documents.",
-  "outgoing_links": [],
+  "internal_links": [],
+  "external_links": [],
   "image_urls": []
 }
 ```
+
+### CSV
+
+The CSV report contains the following fields:
+
+- URL
+- Heading
+- First paragraph
+- Internal links
+- External links
+- Image URLs
+
+Lists are stored as pipe-separated values within CSV fields.
+
+### Markdown
+
+The Markdown report provides a human-readable representation of the crawl:
+
+```text
+crawl.md
+```
+
+Each crawled page contains:
+
+- URL
+- Heading
+- First paragraph
+- Internal links
+- External links
+- Images
+
+### Sitemap
+
+The sitemap contains the URLs successfully crawled by Gotcha and is written as a standard XML sitemap:
+
+```text
+sitemap.xml
+```
+
+Output ordering is deterministic across the supported report formats.
+
+---
+
+## robots.txt
+
+Gotcha automatically checks `/robots.txt` before crawling.
+
+The current implementation supports:
+
+- `User-agent: *`
+- `Disallow`
+
+Other directives such as `Allow`, `Crawl-delay`, and `Sitemap` are currently ignored.
+
+If a website does not provide a `robots.txt` file, Gotcha proceeds without robots.txt restrictions.
+
+---
+
+## Retries
+
+Gotcha automatically retries transient failures, including:
+
+- Request timeouts
+- HTTP `429`
+- HTTP `500`
+- HTTP `502`
+- HTTP `503`
+- HTTP `504`
+
+Retries use exponential backoff:
+
+```text
+500ms
+1s
+2s
+```
+
+---
+
+## Crawl Statistics
+
+Gotcha tracks:
+
+- Pages crawled
+- Failed fetches
+- Skipped pages
+- Internal links discovered
+- External links discovered
+- Pages skipped by `robots.txt`
 
 ---
 
@@ -218,23 +402,39 @@ Each record contains:
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml
+│       ├── lint.yml
 │       └── release.yml
 ├── CHANGELOG.md
 ├── LICENSE
 ├── README.md
+├── benchmark_test.go
 ├── config.go
 ├── crawler.go
+├── crawler_test.go
+├── csv.go
+├── csv_test.go
 ├── errors.go
 ├── extract_content.go
 ├── extract_page.go
+├── extract_page_test.go
 ├── fetch.go
+├── fetch_test.go
+├── integration_test.go
 ├── json_report.go
 ├── logger.go
 ├── main.go
+├── markdown.go
+├── markdown_test.go
 ├── normalize_url.go
+├── normalize_url_test.go
 ├── parser.go
+├── parser_test.go
 ├── robots.go
+├── robots_test.go
+├── sitemap.go
+├── sitemap_test.go
 ├── stats.go
+├── url_test.go
 └── version.go
 ```
 
@@ -243,29 +443,51 @@ Each record contains:
 ## How It Works
 
 1. Start crawling from the provided URL.
-2. Respect the site's `robots.txt` rules.
+2. Check the site's `robots.txt` rules.
 3. Normalize URLs to prevent duplicate visits.
-4. Crawl pages recursively while remaining within the same domain.
-5. Retry transient HTTP failures automatically.
-6. Extract structured page information.
-7. Classify internal and external links.
-8. Store page data in memory.
-9. Generate a deterministic JSON report.
+4. Ensure URLs belong to the same domain.
+5. Crawl pages recursively while respecting concurrency, page, and depth limits.
+6. Apply request rate limiting and optional request delays.
+7. Retry transient HTTP failures using exponential backoff.
+8. Follow HTTP redirects up to the configured redirect limit.
+9. Extract structured page information.
+10. Classify internal and external links.
+11. Store page data in memory.
+12. Generate deterministic JSON output.
+13. Generate optional CSV, Markdown, and XML sitemap reports.
 
 ---
 
 ## Development
 
-Run tests:
+Run the test suite:
 
 ```bash
-go test ./...
+go test ./... -v
 ```
 
 Run static analysis:
 
 ```bash
 go vet ./...
+```
+
+Run linting:
+
+```bash
+golangci-lint run
+```
+
+Run the race detector:
+
+```bash
+go test -race ./...
+```
+
+Run benchmarks:
+
+```bash
+go test -bench=. -benchmem
 ```
 
 Format the code:
@@ -278,6 +500,18 @@ Build:
 
 ```bash
 go build .
+```
+
+### Quality Checks
+
+Before submitting changes, run:
+
+```bash
+gofmt -w .
+go test ./... -v
+go vet ./...
+golangci-lint run
+go test -race ./...
 ```
 
 ---
@@ -312,6 +546,8 @@ git checkout -b feature/my-feature
 gofmt -w .
 go vet ./...
 go test ./...
+golangci-lint run
+go test -race ./...
 ```
 
 4. Commit your changes using a descriptive commit message.
@@ -333,6 +569,8 @@ Before opening a Pull Request, please ensure:
 - [x] Code is formatted with `gofmt`
 - [x] `go vet ./...` passes
 - [x] `go test ./...` passes
+- [x] `golangci-lint run` passes
+- [x] `go test -race ./...` passes
 - [x] Documentation has been updated if required
 - [x] `CHANGELOG.md` has been updated for user-facing changes
 
@@ -343,20 +581,32 @@ If you encounter a bug or have a feature request, please open a GitHub Issue wit
 - A clear description of the problem
 - Steps to reproduce (for bugs)
 - Expected behavior
-- Relevant logs or screenshots (if applicable)
+- Relevant logs or screenshots, if applicable
 
 ---
 
 ## Roadmap
 
-### v0.8.0
+### v0.9.0
 
-- [ ] Smarter duplicate URL detection
-- [ ] Sitemap generation
-- [ ] CSV export
-- [ ] Markdown export
-- [ ] Benchmark suite
-- [ ] Expanded integration test coverage
+- Improved `robots.txt` support
+- Include/exclude URL patterns
+- Canonical URL handling
+- Richer page metadata
+- Improved crawl error reporting
+- Expanded crawl statistics
+- Improved graceful shutdown
+
+### v1.0.0
+
+- Stable crawler API
+- Context-aware crawling
+- Graceful cancellation
+- SSRF and network security hardening
+- Fuzz testing
+- Large-crawl testing
+- Performance and memory optimization
+- Stable CLI and report formats
 
 ---
 

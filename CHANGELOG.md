@@ -1,6 +1,30 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [0.8.0] - 2026-09-30
+
+### Added
+
+- XML sitemap generation with `--sitemap`
+- CSV report generation with `--csv`
+- Markdown report generation with `--markdown`
+- Benchmark suite for URL normalization and page extraction
+- Integration tests for multi-page crawling
+- Integration tests for same-domain restrictions
+- Integration tests for crawl depth limits
+- Integration tests for maximum page limits
+
+### Changed
+
+- Improved URL normalization and duplicate URL detection
+- Enforced maximum page limits atomically during concurrent crawling
+- Expanded crawl report formats
+- Expanded CLI documentation
+
+### Testing
+
+- Added crawler integration test coverage
+- Added race-condition testing
+- Added benchmark coverage
 
 ## [0.7.0] - 2026-08-05
 
