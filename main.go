@@ -96,6 +96,12 @@ func main() {
 		"Generate a crawl.csv file",
 	)
 
+	markdown := flag.Bool(
+		"markdown",
+		false,
+		"Generate a crawl.md file",
+	)
+
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(
 			os.Stderr,
@@ -142,6 +148,7 @@ func main() {
 		slog.String("user_agent", *userAgent),
 		slog.Bool("sitemap", *sitemap),
 		slog.Bool("csv", *csvOutput),
+		slog.Bool("markdown", *markdown),
 	)
 
 	cfg := &config{
@@ -233,6 +240,21 @@ func main() {
 		logger.Info(
 			"CSV report written",
 			slog.String("path", "crawl.csv"),
+		)
+	}
+
+	if *markdown {
+		if err := writeMarkdownReport(cfg.pages, "crawl.md"); err != nil {
+			logger.Error(
+				"failed to write Markdown report",
+				slog.Any("error", err),
+			)
+			os.Exit(1)
+		}
+
+		logger.Info(
+			"Markdown report written",
+			slog.String("path", "crawl.md"),
 		)
 	}
 }
