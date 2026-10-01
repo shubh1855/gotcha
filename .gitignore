@@ -3,3 +3,4 @@ sitemap.xml
 dist/
 report.json
 crawl.csv
+crawl.md

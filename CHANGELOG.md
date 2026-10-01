@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2] - 2026-10-01
+
+### Fixed
+
+- Wire Markdown report generation into the CLI with `--markdown`
+
 ## [0.8.1] - 2026-10-01
 
 ### Fixed
