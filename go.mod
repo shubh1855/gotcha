@@ -1,4 +1,4 @@
-module gotcha
+module github.com/shubh1855/gotcha
 
 go 1.26.1
 
