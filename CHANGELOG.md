@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1] - 2026-10-01
+
+### Fixed
+
+- Set the canonical Go module path to `github.com/shubh1855/gotcha`
+- Enable installation with `go install github.com/shubh1855/gotcha@version`
+
 ## [0.8.0] - 2026-09-30
 
 ### Added
